@@ -15,9 +15,18 @@ pub fn main() !void {
     defer glfw.terminate();
 
     const vertices = [_]f32{
-        -0.5, -0.5 * @sqrt(3.0) / 3.0,      0.0,
-        0.5,  -0.5 * @sqrt(3.0) / 3.0,      0.0,
-        0.0,  0.5 * @sqrt(3.0) * 2.0 / 3.0, 0.0,
+        -0.5, -0.5 * @sqrt(3.0) / 3.0, 0.0, // lower left corner
+        0.5, -0.5 * @sqrt(3.0) / 3.0, 0.0, // lower right corner
+        0.0, 0.5 * @sqrt(3.0) * 2.0 / 3.0, 0.0, // upper corner
+        -0.5 / 2.0, 0.5 * @sqrt(3.0) / 6.0, 0.0, // inner left
+        0.5 / 2.0, 0.5 * @sqrt(3.0) / 6.0, 0.0, // inner right
+        0.0, -0.5 * @sqrt(3.0) / 3.0, 0.0, // inner down
+    };
+
+    const indices = [_]u32{
+        0, 3, 5, // lower left triangle
+        3, 2, 4, // lower left triangle
+        5, 4, 1, // lower left triangle
     };
 
     const window = try glfw.Window.init(800, 800, "夢");
@@ -53,12 +62,16 @@ pub fn main() !void {
 
     var vbo: u32 = undefined;
     var vao: u32 = undefined;
+    var ebo: u32 = undefined;
 
     gl.gen_vertex_arrays(1, &vao);
     defer gl.delete_vertex_array(1, &vao);
 
     gl.gen_buffer(1, &vbo);
     defer gl.delete_buffer(1, &vao);
+
+    gl.gen_buffer(1, &ebo);
+    defer gl.delete_buffer(1, &ebo);
 
     gl.bind_vertex_array(vao);
 
@@ -68,6 +81,9 @@ pub fn main() !void {
         vertices,
         gl.Usage.STATIC_DRAW,
     );
+
+    gl.bind_buffer(gl.BufferBindingTarget.ELEMENT_ARRAY_BUFFER, ebo);
+    gl.buffer_data(gl.BufferBindingTarget.ELEMENT_ARRAY_BUFFER, indices, gl.Usage.STATIC_DRAW);
 
     gl.vertex_attrib_pointer(
         0,
@@ -82,6 +98,7 @@ pub fn main() !void {
     // Unselect vbo and vao
     gl.bind_buffer(gl.BufferBindingTarget.ARRAY_BUFFER, 0);
     gl.bind_vertex_array(0);
+    gl.bind_buffer(gl.BufferBindingTarget.ELEMENT_ARRAY_BUFFER, 0);
 
     gl.clear_color(0.07, 0.13, 0.17, 1.0);
 
@@ -93,7 +110,8 @@ pub fn main() !void {
         gl.clear(gl.Bitfield.COLOR_BUFFER_BIT);
         gl.bind_vertex_array(vao);
         program.use();
-        gl.draw_arrays(gl.Mode.TRIANGLES, 0, 3);
+        // gl.draw_arrays(gl.Mode.TRIANGLES, 0, 6);
+        gl.draw_elements(gl.Mode.TRIANGLES, 9, gl.DataType.UNSIGNED_INT, 0);
         window.swap_buffers();
         glfw.poll_events();
     }

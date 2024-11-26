@@ -16,6 +16,7 @@ pub const ShaderType = enum(u32) {
 
 pub const BufferBindingTarget = enum(u32) {
     ARRAY_BUFFER = c_gl.GL_ARRAY_BUFFER,
+    ELEMENT_ARRAY_BUFFER = c_gl.GL_ELEMENT_ARRAY_BUFFER,
 };
 
 pub const Usage = enum(u32) {
@@ -24,6 +25,7 @@ pub const Usage = enum(u32) {
 
 pub const DataType = enum(u32) {
     FLOAT = c_gl.GL_FLOAT,
+    UNSIGNED_INT = c_gl.GL_UNSIGNED_INT,
 };
 
 pub const Mode = enum(u32) {
@@ -240,5 +242,11 @@ pub fn use_program(program: u32) void {
 /// Render primitives from array data
 pub fn draw_arrays(mode: Mode, first: i32, count: i32) void {
     c_gl.glDrawArrays(@intFromEnum(mode), first, count);
+    handle_error();
+}
+
+// Render primitives from array data
+pub fn draw_elements(mode: Mode, count: i32, data_type: DataType, indices: anytype) void {
+    c_gl.glDrawElements(@intFromEnum(mode), count, @intFromEnum(data_type), @ptrFromInt(indices));
     handle_error();
 }
