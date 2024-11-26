@@ -23,9 +23,9 @@ pub fn main() !void {
 
     _ = try glfw.init();
     defer glfw.terminate();
-    const window = try glfw.create_window(640, 480, "夢");
+    const window = try glfw.Window.init(640, 480, "夢");
 
-    glfw.make_context_current(window);
+    window.make_context_current();
     _ = glfw.set_window_size_callback(window, window_size_changed);
 
     try gl.init();

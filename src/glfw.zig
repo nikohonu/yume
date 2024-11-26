@@ -1,4 +1,4 @@
-const c_glfw = @cImport({
+pub const c_glfw = @cImport({
     @cInclude("GLFW/glfw3.h");
 });
 
