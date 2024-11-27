@@ -15,6 +15,12 @@ pub fn build(b: *std.Build) void {
     exe.linkSystemLibrary("glfw");
     exe.linkSystemLibrary("glew");
 
+    const zgl = b.dependency("zgl", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    exe.root_module.addImport("zgl", zgl.module("zgl"));
+
     b.installArtifact(exe);
 
     const run_cmd = b.addRunArtifact(exe);

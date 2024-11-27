@@ -6,6 +6,8 @@ const window_size_fun = c_glfw.GLFWwindowsizefun;
 pub const GL_COLOR_BUFFER_BIT = c_glfw.GL_COLOR_BUFFER_BIT;
 pub const GL_FALSE = c_glfw.GL_FALSE;
 
+pub const c = c_glfw;
+
 pub const Window = struct {
     window: *c_glfw.GLFWwindow,
 
@@ -37,6 +39,10 @@ pub const Window = struct {
     pub fn swap_buffers(self: Window) void {
         c_glfw.glfwSwapBuffers(self.window);
     }
+
+    pub fn set_window_size_callback(self: Window, callback: window_size_fun) window_size_fun {
+        return c_glfw.glfwSetWindowSizeCallback(self.window, callback);
+    }
 };
 
 pub fn init() !void {
@@ -51,14 +57,9 @@ pub fn poll_events() void {
     c_glfw.glfwPollEvents();
 }
 
-// pub fn set_window_size_callback(window: ?*Window, callback: window_size_fun) window_size_fun {
-//     return c_glfw.glfwSetWindowSizeCallback(window, callback);
-// }
-//
-// pub fn clear(mask: c_glfw.GLbitfield) void {
-//     c_glfw.glClear(mask);
-// }
-//
-// pub fn window_should_close(window: *Window) c_int {
-//     return c_glfw.glfwWindowShouldClose(window);
-// }
+pub const GLProc = *const fn () callconv(.C) void;
+
+pub fn get_proc_address(proc_name: [*:0]const u8) callconv(.C) ?GLProc {
+    if (c_glfw.glfwGetProcAddress(proc_name)) |proc_address| return proc_address;
+    return null;
+}
