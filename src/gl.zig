@@ -39,7 +39,7 @@ pub const Shader = struct {
         return .{ .shader = gl.create_shader(shader_type) };
     }
 
-    pub fn source(self: Shader, count: i32, strings: []const []const u8, length: ?*i32) void {
+    pub fn source(self: Shader, count: i32, strings: anytype, length: ?*i32) void {
         gl.shader_source(self.shader, count, strings, length);
     }
 
@@ -115,8 +115,8 @@ pub fn create_shader(shader_type: ShaderType) u32 {
 }
 
 /// Replaces the source code in a shader object
-pub fn shader_source(shader: u32, count: i32, strings: []const []const u8, length: ?*i32) void {
-    c_gl.__glewShaderSource.?(shader, count, @ptrCast(strings.ptr), length);
+pub fn shader_source(shader: u32, count: i32, strings: anytype, length: ?*i32) void {
+    c_gl.__glewShaderSource.?(shader, count, @ptrCast(strings), length);
     handle_error();
 }
 
@@ -173,7 +173,10 @@ pub fn bind_buffer(target: BufferBindingTarget, buffer: u32) void {
 
 /// Creates and initializes a buffer object's data store
 pub fn buffer_data(target: BufferBindingTarget, data: anytype, usage: Usage) void {
-    c_gl.__glewBufferData.?(@intFromEnum(target), @sizeOf(@TypeOf(data)), @ptrCast(&data), @intFromEnum(usage));
+    const size: i32 = @intCast(
+        data.len * @sizeOf(@typeInfo(@TypeOf(data)).Pointer.child),
+    ); // very scary reflection
+    c_gl.__glewBufferData.?(@intFromEnum(target), size, @ptrCast(data.ptr), @intFromEnum(usage));
     handle_error();
 }
 

@@ -1,7 +1,12 @@
 const std = @import("std");
+
 const glfw = @import("glfw.zig");
 const gl = @import("gl.zig");
+
 const Shader = @import("shader.zig");
+const VAO = @import("vao.zig");
+const VBO = @import("vbo.zig");
+const EBO = @import("ebo.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -38,67 +43,36 @@ pub fn main() !void {
 
     gl.viewport(0, 0, 800, 800);
 
-    const vertex_shader = try Shader.init_from_path(
+    const shader = try Shader.init(
         allocator,
-        gl.ShaderType.VERTEX_SHADER,
-        "shaders/basic_vertex.glsl",
+        "shaders/default.vert",
+        "shaders/default.frag",
     );
-    defer vertex_shader.deinit();
+    defer shader.deinit();
 
-    const fragment_shader = try Shader.init_from_path(
-        allocator,
-        gl.ShaderType.FRAGMENT_SHADER,
-        "shaders/basic_fragment.glsl",
-    );
-    defer fragment_shader.deinit();
+    // Init VAO
+    const vao1 = VAO.init();
+    defer vao1.deinit();
+    // Bind VAO, means that next data will be defined by this vao
+    vao1.bind();
 
-    const program = gl.Program.init();
-    defer program.deinit();
+    // Init and bind VBO
+    const vbo1 = VBO.init(&vertices);
+    defer vbo1.deinit();
 
-    program.attach_shader(vertex_shader.shader);
-    program.attach_shader(fragment_shader.shader);
+    // Init and bind EBO
+    const ebo1 = EBO.init(&indices);
+    defer ebo1.deinit();
 
-    program.link();
+    // Link our VBO to our VAO, that include defining in what way VAO
+    // describe VBO
+    vao1.link_vbo(vbo1, 0);
 
-    var vbo: u32 = undefined;
-    var vao: u32 = undefined;
-    var ebo: u32 = undefined;
-
-    gl.gen_vertex_arrays(1, &vao);
-    defer gl.delete_vertex_array(1, &vao);
-
-    gl.gen_buffer(1, &vbo);
-    defer gl.delete_buffer(1, &vao);
-
-    gl.gen_buffer(1, &ebo);
-    defer gl.delete_buffer(1, &ebo);
-
-    gl.bind_vertex_array(vao);
-
-    gl.bind_buffer(gl.BufferBindingTarget.ARRAY_BUFFER, vbo);
-    gl.buffer_data(
-        gl.BufferBindingTarget.ARRAY_BUFFER,
-        vertices,
-        gl.Usage.STATIC_DRAW,
-    );
-
-    gl.bind_buffer(gl.BufferBindingTarget.ELEMENT_ARRAY_BUFFER, ebo);
-    gl.buffer_data(gl.BufferBindingTarget.ELEMENT_ARRAY_BUFFER, indices, gl.Usage.STATIC_DRAW);
-
-    gl.vertex_attrib_pointer(
-        0,
-        3,
-        gl.DataType.FLOAT,
-        false,
-        3 * @sizeOf(f32),
-        @ptrFromInt(0),
-    );
-    gl.enable_vertex_attrib_array(0);
-
-    // Unselect vbo and vao
-    gl.bind_buffer(gl.BufferBindingTarget.ARRAY_BUFFER, 0);
-    gl.bind_vertex_array(0);
-    gl.bind_buffer(gl.BufferBindingTarget.ELEMENT_ARRAY_BUFFER, 0);
+    // Unbind = unselect all VAO, because it means from now on, we can't change
+    // anything about our data
+    vao1.unbind();
+    vbo1.unbind();
+    ebo1.unbind();
 
     gl.clear_color(0.07, 0.13, 0.17, 1.0);
 
@@ -108,9 +82,9 @@ pub fn main() !void {
     while (!window.should_close()) {
         gl.clear_color(0.07, 0.13, 0.17, 1.0);
         gl.clear(gl.Bitfield.COLOR_BUFFER_BIT);
-        gl.bind_vertex_array(vao);
-        program.use();
-        // gl.draw_arrays(gl.Mode.TRIANGLES, 0, 6);
+        shader.use();
+        // Bind VAO, it shows how to use current data
+        vao1.bind();
         gl.draw_elements(gl.Mode.TRIANGLES, 9, gl.DataType.UNSIGNED_INT, 0);
         window.swap_buffers();
         glfw.poll_events();
