@@ -1,24 +1,36 @@
 const std = @import("std");
 
+const rl = @import("raylib");
+
+const Player = @import("player.zig");
+
 pub fn main() !void {
-    // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
-    std.debug.print("All your {s} are belong to us.\n", .{"codebase"});
+    // Init
+    rl.initWindow(800, 600, "夢");
+    defer rl.closeWindow();
+    rl.setTargetFPS(60);
 
-    // stdout is for the actual output of your application, for example if you
-    // are implementing gzip, then only the compressed bytes should be sent to
-    // stdout, not any debugging messages.
-    const stdout_file = std.io.getStdOut().writer();
-    var bw = std.io.bufferedWriter(stdout_file);
-    const stdout = bw.writer();
+    // Instance
+    var player = Player.init(300);
 
-    try stdout.print("Run `zig build test` to run the tests.\n", .{});
+    while (!rl.windowShouldClose()) {
+        // Update
+        const delta = rl.getFrameTime();
+        player.update(delta);
 
-    try bw.flush(); // don't forget to flush!
+        // Draw
+        rl.beginDrawing();
+        defer rl.endDrawing();
+        rl.clearBackground(rl.Color.ray_white);
+        rl.drawFPS(10, 10);
+        rl.drawText("", 190, 200, 20, rl.Color.light_gray);
+        player.draw();
+    }
 }
 
 test "simple test" {
     var list = std.ArrayList(i32).init(std.testing.allocator);
-    defer list.deinit(); // try commenting this out and see if zig detects the memory leak!
+    defer list.deinit();
     try list.append(42);
     try std.testing.expectEqual(@as(i32, 42), list.pop());
 }
