@@ -1,0 +1,104 @@
+[gd_scene load_steps=8 format=3 uid="uid://3ukleevhcf5w"]
+
+[ext_resource type="Texture2D" uid="uid://bn5flwyjibh2g" path="res://sprites/player.png" id="1_l8byi"]
+[ext_resource type="Texture2D" uid="uid://dkc7t40hg75bg" path="res://sprites/blocks.png" id="1_or6ws"]
+[ext_resource type="Script" path="res://player.gd" id="1_qtnqe"]
+[ext_resource type="Script" path="res://map.gd" id="3_uf01w"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_2wfum"]
+texture = ExtResource("1_or6ws")
+texture_region_size = Vector2i(32, 32)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+6:1/0 = 0
+7:1/0 = 0
+0:2/0 = 0
+1:2/0 = 0
+2:2/0 = 0
+3:2/0 = 0
+4:2/0 = 0
+5:2/0 = 0
+6:2/0 = 0
+7:2/0 = 0
+0:3/0 = 0
+1:3/0 = 0
+2:3/0 = 0
+3:3/0 = 0
+4:3/0 = 0
+5:3/0 = 0
+6:3/0 = 0
+7:3/0 = 0
+0:4/0 = 0
+1:4/0 = 0
+2:4/0 = 0
+3:4/0 = 0
+4:4/0 = 0
+5:4/0 = 0
+6:4/0 = 0
+7:4/0 = 0
+0:5/0 = 0
+1:5/0 = 0
+2:5/0 = 0
+3:5/0 = 0
+4:5/0 = 0
+5:5/0 = 0
+6:5/0 = 0
+7:5/0 = 0
+0:6/0 = 0
+1:6/0 = 0
+2:6/0 = 0
+3:6/0 = 0
+4:6/0 = 0
+5:6/0 = 0
+6:6/0 = 0
+7:6/0 = 0
+0:7/0 = 0
+1:7/0 = 0
+2:7/0 = 0
+3:7/0 = 0
+4:7/0 = 0
+5:7/0 = 0
+6:7/0 = 0
+7:7/0 = 0
+3:0/0 = 0
+
+[sub_resource type="TileSet" id="TileSet_v3r1n"]
+tile_size = Vector2i(32, 32)
+sources/0 = SubResource("TileSetAtlasSource_2wfum")
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_cplfn"]
+radius = 12.0
+height = 48.0
+
+[node name="Game" type="Node2D"]
+
+[node name="Map" type="TileMapLayer" parent="."]
+tile_set = SubResource("TileSet_v3r1n")
+script = ExtResource("3_uf01w")
+
+[node name="Player" type="CharacterBody2D" parent="."]
+script = ExtResource("1_qtnqe")
+
+[node name="Sprite" type="Sprite2D" parent="Player"]
+texture = ExtResource("1_l8byi")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Player"]
+shape = SubResource("CapsuleShape2D_cplfn")
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+zoom = Vector2(0.1, 0.1)
+
+[node name="Player2" type="Sprite2D" parent="."]
+position = Vector2(107, 29)
+texture = ExtResource("1_l8byi")
